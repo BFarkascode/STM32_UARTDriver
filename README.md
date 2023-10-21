@@ -1,4 +1,7 @@
 # STM32_UARTDriver
+
+Note: I am learning github right now, so things will look and be kinda trash until I get a hang of things...
+
 This is a are metal guide for implementing UART serial for STM32.
 
 UART serial communciation is considered to be one of the - if not the - most commonly used communication protocol within the world of micros. This definitely reflects on the reference manual (refman) of STM32, where the UART section takes up probably the most amount of pages in the documentation.
@@ -23,5 +26,10 @@ Describing in layman's terms on how UART itself works:
 - 3)We ensure that the Rx buffer is emptied when full (so no incoming data lost), we funnel data into the Tx buffer when it is empty AND not do so again until the shift register on the Tx side has been emptied aswell. This latter is crucial if we want to send over more than  one byte in a sequence.
 
 One particularity of UART compared to the other two common com protocols is that it does not have a "master": where with other system, one simply is synchronized to the bus due to the master's clock, there is no such thing in UART. Instead, the transmitter (Tx) and the receiver (Rx) "agree" ahead of time at what frequency (here called baud rate) the data is coming in on your bus, and then the Rx side samples the bus at a much higher speed to actually recognize these data bytes (called oversampling the bus by times 8 or 16).
+
+
+
+
+
 Another particularity is with controlling the UART communication. Unlike SPI where control is pretty clear using the slave select and the duplex nature of the bus or with I2C where designated start and stop conditions can be recognized readily by the hardware, UART does not have a distinct start or stop condition for messages. These issues will be discussed after we have generated a byte-by-byte Tx/Rx communication.
 
