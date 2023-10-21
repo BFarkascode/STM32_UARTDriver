@@ -5,6 +5,7 @@ Note: I am learning github right now, so things will look and be kinda trash unt
 This is a bare metal guide for implementing UART serial for STM32.
 
 UART serial communciation is considered to be one of the - if not the - most commonly used communication protocol within the world of micros. This definitely reflects on the reference manual (refman) of STM32, where the UART section takes up probably the most amount of pages in the documentation.
+
 When I first saw this, I was a bit baffled. After all, UART is considered to be simple, so why so much documentation? Well, as it turns out, you can modify UART left, right and center, add DMA to deal with flows of incoming data, implement multiple synchronization options, control communication quality using parity bits, add security, have extended/advanced modes and in general complicate the protocol past the point of necessity if you just want a damn byte passed from one micro to another. The good news is that once you ignore all this extra, UART does become a lot simpler. The absolutely relevant sections in the refman for a simple byte-to-byte communication are (I am using the refman for the L0x3 here):
 
 - 29.4 UART implementation - a table to show, which of the UARTs have which features (there are multiple of UART options in the micro, in the L0x3, there are 5 different UARTs)
