@@ -19,7 +19,7 @@ The absolutely relevant sections in the refman for a simple byte-to-byte communi
 - 29.8. UART registers - a list of the registers to control the UART. This section will be used a LOT during the project. As a matter of fact, bare metal coding IS the application of this section in practice.
 
 In a practical sense, UART is very much the same as the other standard com protocols (I2C and SPI) where:
-- it has a buffer for both incoming/outgoing messages that are connected to the bus through shift registers. We interfact with these buffers to receive/transmit a message.
+- it has a buffer for both incoming/outgoing messages that are connected to the bus through shift registers. We interfact with these buffers to receive/transmit a "word" (usually a byte, but can be 7 or 9 bits too).
 - Rx, Tx and the UART itself have their own enable bits. The communication is controlled by the state of the buffer and the state of the UART enable bits
 - the communication itself is non-blocking when active, thus adequate amount of time must be allowed for the shift registers to "shift" or the data will get corrupted. On the Rx side, this can be scheduled by checking if the Rx buffer is full or not, on the Tx side, this can either be done by defining a hard delay between Tx buffer updates or by checking the if the Tx buffer is empty.
 
