@@ -40,10 +40,10 @@ Another particularity is with controlling the UART communication. Unlike SPI whe
 Start message problem is relatively simple to solve where one will look for an exact sequence of bytes at the beginning of a message and if that sequence if found, the micro starts logging in the incoming data.
 For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
 
-The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c).
-The main.c shows working examples for the drivers.
+The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c). The main.c shows working examples for the drivers.
+I used the STM32Cube IDE to interface with the STM32L053, though other toolchains should also work. The only thing that might not be compatible is the HAL-based delay function I used in this project.
 
-Prerequeisits to activate this driver are:
+prerequisitea to activate this driver are:
 1)Use an STM32L0xx series microcontroller. (There is a slight chance that it may work for others too, but I haven't tested it yet. My personal experience suggests that it won't...)
 2)Pick the UART and the connected Tx/Rx pins.
 3)Set the APB2 clocking to 16 MHz.
