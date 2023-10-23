@@ -45,7 +45,7 @@ Another particularity is with controlling the UART communication. Unlike SPI whe
 Start message problem is relatively simple to solve where one will look for an exact sequence of bytes at the beginning of a message and if that sequence if found, the micro starts logging in the incoming data.
 For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
 
-To handle a message incoming, we are using:
+To deal with a message incoming, we are using:
 - void UART1Config (void)
 - void UART1_IRQ_Config(void)
 - void UART1RxMessage(void)
@@ -58,13 +58,13 @@ The driver codes provided are self-containing, except for the Rx message buffer 
 
 I used the STM32Cube IDE to interface with the STM32L053, though other toolchains should also work. The only thing that might not be compatible is the HAL-based delay function I used in this project.
 
+Even though DMA would be useful here since it removes the blocking nature of the driver functions, that capability is not added to the driver to avoid additional complexity. I will likely do a DMA project later instead to show, how it works.
+
 Prerequisites to activate this driver are:
   1) Use an STM32L0xx series microcontroller. (There is a slight chance that it may work for others too, but I haven't tested it yet. My personal experience suggests that it won't...)
   2) Pick the UART and the connected Tx/Rx pins (here, USART1 on PA9/D2 and PA10/D8).
   3) Set the APB2 clocking to 16 MHz.
 
-Of note, the other side of the coms is not provided here. It is expected that whatever the STM32 is talking to is:
-1) Communicating a baud rate matching the driver (currently set to 57600)
-2) When using Rx message reception, the messages are formed according to specifications. The message starts with the double bytes "0xF0" and "0xF0" to indicate a message start; themessage is shorter than 64 words/256 bytes (that is the size of the Rx message buffer).
-
-DMA is not added to the driver since I will likely do a DMA project later instead to show, how DMA works.
+The examples do not include the other side of the communication system. In order to have the drivers be compatbile with the other side, it is expected that whatever the STM32 is talking to is:
+1) Communicating at a baud rate matching the driver (currently set to 57600)
+2) When using Rx message reception, the messages are formed according to specifications where the message starts with the double bytes "0xF0" and "0xF0" to indicate a message start and the message is shorter than 64 words/256 bytes (that is the size of the Rx message buffer).
