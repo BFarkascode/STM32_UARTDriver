@@ -1,6 +1,6 @@
 # STM32_UARTDriver
 
-##General description
+## General description
 
 This is a bare metal guide for implementing UART serial for STM32L0xx.
 
@@ -28,7 +28,7 @@ Describing in layman's terms on how UART itself works:
 - 2)We enable the buffers for Tx or Rx or both. We enable the the UART and thus start to listen to the bus or prepare to send over whatever we put into the Tx buffer.
 - 3)We ensure that the Rx buffer is emptied when full (so no incoming data lost), we funnel data into the Tx buffer when it is empty AND not do so again until the shift register on the Tx side has been emptied aswell. This latter is crucial if we want to send over more than  one byte in a sequence.
 
-##Particularities
+## Particularities
 One particularity of UART compared to the other two common com protocols is that it does not have a "master": where with other system, one simply is synchronized to the bus due to the master's clock, there is no such thing in UART. Instead, the transmitter (Tx) and the receiver (Rx) "agree" ahead of time at what frequency (here called baud rate) the data is coming in on your bus, and then the Rx side samples the bus at a much higher speed to actually recognize these data bytes (called oversampling the bus by times 8 or 16).
 
 Until this moment, the functions we are using are:
@@ -43,7 +43,7 @@ Another particularity is with controlling the UART communication. Unlike SPI whe
 Start message problem is relatively simple to solve where one will look for an exact sequence of bytes at the beginning of a message and if that sequence if found, the micro starts logging in the incoming data.
 For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
 
-##User guide
+## User guide
 The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c). The main.c shows working examples for the drivers.
 I used the STM32Cube IDE to interface with the STM32L053, though other toolchains should also work. The only thing that might not be compatible is the HAL-based delay function I used in this project.
 
