@@ -41,6 +41,7 @@ Start message problem is relatively simple to solve where one will look for an e
 For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
 
 Driver user guide
+
 The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c).
 The main.c shows working examples for the drivers.
 
