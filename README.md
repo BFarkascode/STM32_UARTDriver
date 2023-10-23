@@ -55,7 +55,7 @@ Prerequisites to activate this driver are:
 3)Set the APB2 clocking to 16 MHz.
 
 Of note, the other side of the coms is not provided here. It is expected that whatever the STM32 is talking to is:
-- 1)Communicating a baud rate matching the driver (currently set to 57600)
-- 2)When using Rx message reception, the messages are formed according to specifications. The message starts with the double bytes "0xF0" and "0xF0" to indicate a message start; themessage is shorter than 64 words/256 bytes (that is the size of the Rx message buffer).
+- 1) Communicating a baud rate matching the driver (currently set to 57600)
+- 2) When using Rx message reception, the messages are formed according to specifications. The message starts with the double bytes "0xF0" and "0xF0" to indicate a message start; themessage is shorter than 64 words/256 bytes (that is the size of the Rx message buffer).
 
 DMA is not added to the driver since I will likely do a DMA project later instead to show, how DMA works.
