@@ -33,7 +33,7 @@ The absolutely relevant sections in the refman for a simple byte-to-byte communi
 ## Particularities
 One particularity of UART compared to the other two common com protocols is that it does not have a "master": where with other system, one simply is synchronized to the bus due to the master's clock, there is no such thing in UART. Instead, the transmitter (Tx) and the receiver (Rx) "agree" ahead of time at what frequency (here called baud rate) the data is coming in on your bus, and then the Rx side samples the bus at a much higher speed to actually recognize these data bytes (called oversampling the bus by times 8 or 16).
 
-Until this moment, the functions we are using are:
+For a simple byte-by-byte communication, the functions we are using are:
 - void UART1Config (void)
 - uint8_t UART1RxByte (void)
 - uint8_t UART1TxByte (void)
@@ -44,6 +44,14 @@ Another particularity is with controlling the UART communication. Unlike SPI whe
 
 Start message problem is relatively simple to solve where one will look for an exact sequence of bytes at the beginning of a message and if that sequence if found, the micro starts logging in the incoming data.
 For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
+
+To handle a message incoming, we are using:
+- void UART1Config (void)
+- void UART1_IRQ_Config(void)
+- void UART1RxMessage(void)
+- void USART1_IRQHandler(void)
+
+Note: the "handler" function is an in-built function that is called whenever a periphery's internal interrupt is triggered. It does not need to be prototyped in the header file by the programmer. Interrupts are a particular set of functions that run outside the code loop we write in the "main.c". I will likely do a project on them some other time.
 
 ## User guide
 The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c). The main.c shows working examples for the drivers.
