@@ -10,13 +10,13 @@ When I first saw this, I was a bit baffled. After all, UART is considered to be 
 
 In a practical sense, UART is very much the same as the other standard com protocols (I2C and SPI) where:
 - it has a buffer for both incoming/outgoing messages that are connected to the bus through shift registers. We interfact with these buffers to receive/transmit a "word" (usually a byte, but can be 7 or 9 bits too).
-- Rx, Tx and the UART itself have their own enable bits. The communication is controlled by the state of the buffer and the state of the UART enable bits
+- Rx, Tx and the UART itself have their own enable bits. The communication is controlled by the state of the buffer (full or empty) and the state of the UART enable bits. Things happen when stuff is enabled and the buffer is empty(Rx) / full(Tx).
 - the communication itself is non-blocking when active, thus adequate amount of time must be allowed for the shift registers to "shift" or the data will get corrupted. On the Rx side, this can be scheduled by checking if the Rx buffer is full or not, on the Tx side, this can either be done by defining a hard delay between Tx buffer updates or by checking the if the Tx buffer is empty.
 
 Describing in layman's terms on how UART itself works:
-- 1) We set up, how we want to communicate (word length, stop bits, clock phase, etc., we will discuss this more in the UART init function)
-- 2) We enable the buffers for Tx or Rx or both. We enable the the UART and thus start to listen to the bus or prepare to send over whatever we put into the Tx buffer.
-- 3) We ensure that the Rx buffer is emptied when full (so no incoming data lost), we funnel data into the Tx buffer when it is empty AND not do so again until the shift register on the Tx side has been emptied aswell. This latter is crucial if we want to send over more than  one byte in a sequence.
+ 1) We set up, how we want to communicate (word length, stop bits, clock phase, etc., we will discuss this more in the UART init function)
+ 2) We enable the buffers for Tx or Rx or both. We enable the the UART and thus start to listen to the bus or prepare to send over whatever we put into the Tx buffer.
+ 3) We ensure that the Rx buffer is emptied when full (so no incoming data lost), we funnel data into the Tx buffer when it is empty AND not do so again until the shift register on the Tx side has been emptied aswell. This latter is crucial if we want to send over more than  one byte in a sequence.
 
 ### To read
 The absolutely relevant sections in the refman for a simple byte-to-byte communication are (I am using the refman for the L0x3 here):
