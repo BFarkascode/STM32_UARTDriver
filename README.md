@@ -50,9 +50,9 @@ The driver codes provided are self-containing, except for the Rx message buffer 
 I used the STM32Cube IDE to interface with the STM32L053, though other toolchains should also work. The only thing that might not be compatible is the HAL-based delay function I used in this project.
 
 Prerequisites to activate this driver are:
-1)Use an STM32L0xx series microcontroller. (There is a slight chance that it may work for others too, but I haven't tested it yet. My personal experience suggests that it won't...)
-2)Pick the UART and the connected Tx/Rx pins.
-3)Set the APB2 clocking to 16 MHz.
+  1) Use an STM32L0xx series microcontroller. (There is a slight chance that it may work for others too, but I haven't tested it yet. My personal experience suggests that it won't...)
+  2) Pick the UART and the connected Tx/Rx pins.
+  3) Set the APB2 clocking to 16 MHz.
 
 Of note, the other side of the coms is not provided here. It is expected that whatever the STM32 is talking to is:
 - 1) Communicating a baud rate matching the driver (currently set to 57600)
