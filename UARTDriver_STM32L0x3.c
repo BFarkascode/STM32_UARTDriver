@@ -12,7 +12,7 @@
 //1)UART init (no DMA)
 void UART1Config (void)
 {
-	/**We wish to recreate the CubeMX generate uart1 control. That uart1 has 115200 baud, 8 bit word length, no parity, 1 stop bit and 16 sample oversampling
+	/**
 	 * We do three things here:
 	 * 
 	 * 1)RCC registers: We enable the clocking of the peripheral (APB1ENR or APB2ENR, depending on where the UART is clocked from) and the GPIO port (IOPENR).
@@ -46,7 +46,7 @@ void UART1Config (void)
 	//1)Set the clock source, enable hardware
 	RCC->APB2ENR |= (1<<14);															//APB2 is the peripheral clock enable. Bit 14 is to enable the uart1 clock
 	RCC->IOPENR |= (1<<0);																//IOPENR enables the clock on the PORTA (PA10/D2 is Rx, PA9/D8 is Tx for USART1)
-//	RCC->CCIPR |= (2<<0);																//we could clock the UART using HSI16 as source (16 MHz). We currently clock on APB2 isnetad, which is also 16 MHz.
+//	RCC->CCIPR |= (2<<0);																//we could clock the UART using HSI16 as source (16 MHz). We currently clock on APB2 instead, which is also 16 MHz.
 
 	//2)Set the GPIOs
 	GPIOA->MODER &= ~(1<<18);															//AF for PA9
@@ -66,7 +66,7 @@ void UART1Config (void)
 	USART1->CR1 &= ~(1<<15);															//oversampling is 16
 
 	USART1->CR1 |= (1<<2);																//enable the Rx part of UART
-	USART1->CR1 |= (1<<3);																//enable the Tx part of UART - currently removed
+	USART1->CR1 |= (1<<3);																//enable the Tx part of UART
 
 	USART1->CR2 &= ~(1<<12);															//One stop bit
 	USART1->CR2 &= ~(1<<13);
@@ -120,18 +120,30 @@ uint8_t UART1RxByte (void)
 
 //3)UART1 send one byte
 
-//TBD
-
-void UART1TxByte (uint8_t) {
-
+void UART1TxByte (uint8_t Tx_byte)
+{
+	/**
+	 * After enabling the UART, we do three things here:
+	 * 1)We load the byte we wish to send into the Tx buffer
+	 * 2)We block the mcu until this byte has been transferred to the shift register.
+	 * 3)We wait until the shift register is cleared and then shut off the UART.
+	 *
+	 *
+	 * Steps to implement
+	 * 1)Check UART state/interrupt register for ready flag
+	 * 2)Load data into the UART TX buffer
+	 * **/
+	USART1->CR1 |= (1<<0);																//enable the UART1
+	USART1->TDR = Tx_byte;																//we load the byte into the transmit register
+	while(!(USART1->ISR & (1<<6)));														//bit 6 is the TC/transmit complete register. If it goes HIGH, we are done with the TX.
+	HAL_Delay(1);																		//we wait until the shift register fully places the byte on the bus
+	USART1->CR1 &= ~(1<<0);																//disable the UART1
 }
 
 
 //4)UART1 get the message - with message start sequence
-void UART1RxMessage_custom(void) {
-	/*
-	 * Small note, I used enum typedefs for Yes/No selection (see the header file). This is to have something similar as a boolean type for clarity's sake.
-	 
+void UART1RxMessage(void) {
+	/**
 	 * We do four things here:
 	 * 1)We tell the function to run until the message received flag has not been cleared.
 	 * 2)We start the first state machine where the first state is that message has not started yet. In this state, we start listening to the bus and wait until a byte comes in (while loop ensures a blocking operation, we don't move on until something is received).
@@ -213,28 +225,24 @@ void UART1RxMessage_custom(void) {
 }
 
 
-//5)UART1 IRQ setup
+//5)UART1 IRQ setup for message reception
+void UART1_IRQ_Config(void) {
 	/*
 	 *We do two things here:
 	 *1)We set the IRQ priority. Every IRQ has to have a priority in case the end up overlapping. Here we only have one IRQ running so it is safe to give it a priority of 1. One will need to adjust this priority in case of multiple IRQs running within the code.
 	 *2)We set the bit in the CR1 register that will activate the UART IRQ when an idle frame is detected. The refman does not specifically say here that enabling and disabling the UART is necessary to implement this bit change, albeit it is recommended to not do any changes within a driver while it is running.
-
-	 *shut off UART to modify it
-	 *CR1 bit 4 for IDIE to allow IRQ
-	 *turn UART back on
-	 *	
-	 *
 	 */
 
-//TBD	 
-	 
-void N/A(void) {
-
+	USART1->CR1 &= ~(1<<0);																	//disable the UART1
+	USART1->CR1 |= (1<<4);																	//IDIE enabled. It activates the main USART1 IRQ.
+																							//Note: an idle frame is the word length, plus stop bit, plus start bit. This will be a bit longer than 1 ms (1.04 ms to be precise) at 9600 baud rate
+	NVIC_SetPriority(USART1_IRQn, 1);														//IRQ priority for channel
+																							//Note: it is recommended to NOT give priority 0 to anything. It sometimes clashes with existing hardware IRQs.
 }
 
 
 
-//6) UART1 IRQ
+//6) UART1 IRQ (triggered on idle frame detection, see IRQ config)
 void USART1_IRQHandler(void) {
 	/* 
 	 * We do three things here:
@@ -243,7 +251,7 @@ void USART1_IRQHandler(void) {
 	 * 2)If we had this IRQ trigger 2 times, we set the message received flag (and thus break the main while loop in the RxMessage function) and wipe the idle frame counter.
 	 * 3)We remove the ISR flag connected to the IRQ. This MUST be done all the time, otherwise the IRQ will keep on triggering unnecessarily.
 
-	 * This IRQ currently only activates on the detection of an idle frame.
+	 * This IRQ currently activates on the detection of an idle frame.
 	 * Idle frames are the indicators that we don't have incoming data anymore.
 	 *
 	 * Note: since we are parallel receiving data AND doing other stuff, we MUST leave some time for any concurrent process to activate or conclude.
@@ -256,13 +264,4 @@ void USART1_IRQHandler(void) {
 		Idle_frame_counter = 0;
 	}
 	USART1->ICR |= (1<<4);														//Idle detect flag clearing
-}
-
-
-//7)UART1 DMA
-
-//TBD
-
-void N/A(void) {
-
 }
