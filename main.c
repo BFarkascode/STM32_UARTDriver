@@ -61,7 +61,7 @@ uint32_t Rx_Message_buf [64];
 
 uint8_t* Rx_Message_buf_ptr = Rx_Message_buf;
 
-//printf transition
+//printf transition - this is here to channel the USART2 serial writing to the printf. Not having this would not allow us to receive serial data from the STM32.
 int _write(int file, char *ptr, int len)
 {
 	int DataIdx;
