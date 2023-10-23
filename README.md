@@ -1,8 +1,6 @@
 # STM32_UARTDriver
 
-Note: I am learning github right now, so things will look and be kinda trash until I get a hang of things...
-
-This is a bare metal guide for implementing UART serial for STM32.
+This is a bare metal guide for implementing UART serial for STM32L0xx.
 
 UART serial communciation is considered to be one of the - if not the - most commonly used communication protocol within the world of micros. This definitely reflects on the reference manual (refman) of STM32, where the UART section takes up probably the most amount of pages in the documentation.
 
@@ -42,3 +40,19 @@ Another particularity is with controlling the UART communication. Unlike SPI whe
 Start message problem is relatively simple to solve where one will look for an exact sequence of bytes at the beginning of a message and if that sequence if found, the micro starts logging in the incoming data.
 For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
 
+Driver user guide
+The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c).
+The main.c shows working examples for the drivers.
+
+Prerequeisits to activate this driver are:
+1)Use an STM32L0xx series microcontroller. (There is a slight chance that it may work for others too, but I haven't tested it yet. My personal experience suggests that it won't...)
+2)Pick the UART and the connected Tx/Rx pins.
+3)Set the APB2 clocking to 16 MHz.
+
+Of note, the other side of the coms is not provided here. It is expected that whatever the STM32 is talking to is:
+1)Communicating a baud rate matching the driver (currently set to 57600)
+2)When using Rx message reception, the messages are formed according to specifications:
+- message starts with the double bytes "0xF0" and "0xF0" to indicate a message start
+- message is shorter than 64 words/256 bytes (that is the size of the Rx message buffer)
+
+DMA is not added to the driver since I will likely do a DMA project later instead to show, how DMA works.
