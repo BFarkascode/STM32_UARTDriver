@@ -63,7 +63,7 @@ Even though DMA would be useful here since it removes the blocking nature of the
 Prerequisites to activate this driver are:
   1) Use an STM32L0xx series microcontroller. (There is a slight chance that it may work for others too, but I haven't tested it yet. My personal experience suggests that it won't...)
   2) Pick the UART and the connected Tx/Rx pins (here, USART1 on PA9/D2 and PA10/D8).
-  3) Set the APB2 clocking to 16 MHz.
+  3) Set the APB2 clocking to 16 MHz either by code or using the clock configuration part in the CubeIDE's CubeMx section.
 
 The examples do not include the other side of the communication system. In order to have the drivers be compatbile with the other side, it is expected that whatever the STM32 is talking to is:
 1) Communicating at a baud rate matching the driver (currently set to 57600)
