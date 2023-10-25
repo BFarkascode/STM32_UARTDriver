@@ -4,19 +4,19 @@
 
 This is a bare metal guide for implementing UART serial for STM32L0xx.
 
-UART serial communciation is considered to be one of the - if not the - most commonly used communication protocol within the world of micros. This definitely reflects on the reference manual (refman) of STM32, where the UART section takes up probably the most amount of pages in the documentation.
+UART serial communication is considered to be one of the - if not the - most commonly used communication protocol within the world of micros. This definitely reflects on the reference manual (refman) of STM32, where the UART section takes up probably the most amount of pages in the documentation.
 
 When I first saw this, I was a bit baffled. After all, UART is considered to be simple, so why so much documentation? Well, as it turns out, you can modify UART left, right and center, add DMA to deal with flows of incoming data, implement multiple synchronization options, control communication quality using parity bits, add security, have extended/advanced modes and in general complicate the protocol past the point of necessity if you just want a damn byte passed from one micro to another. The good news is that once you ignore all this extra, UART does become a lot simpler.
 
 In a practical sense, UART is very much the same as the other standard com protocols (I2C and SPI) where:
-- it has a buffer for both incoming/outgoing messages that are connected to the bus through shift registers. We interfact with these buffers to receive/transmit a "word" (usually a byte, but can be 7 or 9 bits too).
+- it has a buffer for both incoming/outgoing messages that are connected to the bus through shift registers. We interact with these buffers to receive/transmit a "word" (usually a byte, but can be 7 or 9 bits too).
 - Rx, Tx and the UART itself have their own enable bits. The communication is controlled by the state of the buffer (full or empty) and the state of the UART enable bits. Things happen when stuff is enabled and the buffer is empty(Rx) / full(Tx).
 - the communication itself is non-blocking when active, thus adequate amount of time must be allowed for the shift registers to "shift" or the data will get corrupted. On the Rx side, this can be scheduled by checking if the Rx buffer is full or not, on the Tx side, this can either be done by defining a hard delay between Tx buffer updates or by checking the if the Tx buffer is empty.
 
 Describing in layman's terms on how UART itself works:
  1) We set up, how we want to communicate (word length, stop bits, clock phase, etc., we will discuss this more in the UART init function)
- 2) We enable the buffers for Tx or Rx or both. We enable the the UART and thus start to listen to the bus or prepare to send over whatever we put into the Tx buffer.
- 3) We ensure that the Rx buffer is emptied when full (so no incoming data lost), we funnel data into the Tx buffer when it is empty AND not do so again until the shift register on the Tx side has been emptied aswell. This latter is crucial if we want to send over more than  one byte in a sequence.
+ 2) We enable the buffers for Tx or Rx or both. We enable the UART and thus start to listen to the bus or prepare to send over whatever we put into the Tx buffer.
+ 3) We ensure that the Rx buffer is emptied when full (so no incoming data lost), we funnel data into the Tx buffer when it is empty AND not do so again until the shift register on the Tx side has been emptied as well. This latter is crucial if we want to send over more than  one byte in a sequence.
 
 ### To read
 The absolutely relevant sections in the refman for a simple byte-to-byte communication are (I am using the refman for the L0x3 here):
@@ -43,7 +43,7 @@ Another particularity is with controlling the UART communication. Unlike SPI whe
 - the end of a message: the lack of a clear stop condition for a message means that one can not tell when the message has stopped.
 
 Start message problem is relatively simple to solve where one will look for an exact sequence of bytes at the beginning of a message and if that sequence if found, the micro starts logging in the incoming data.
-For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personnaly decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
+For the message ending, the solution from the start side can not be used since one can not control the content of a message and ensure that any random sequence defined for the end indicator would not come up already in the message, effectively cutting short the communication. The typical solution to this issue is to know before we send the message, how many bytes it would be, then send this expected number of bytes over to the receiver as the very first part of any message. This way the received will call it a day once the expected number of bytes have been received. I personally decided not to follow this solution since it limits the utility of the Rx to those scenarios where the message length is known prior the transmission. How I did it (see below) is by relying on the UART main interrupt to end the message. I will touch upon interrupt handling in an other project.
 
 To deal with a message incoming, we are using:
 - void UART1Config (void)
@@ -65,6 +65,6 @@ Prerequisites to activate this driver are:
   2) Pick the UART and the connected Tx/Rx pins (here, USART1 on PA9/D2 and PA10/D8).
   3) Set the APB2 clocking to 16 MHz either by code or using the clock configuration part in the CubeIDE's CubeMx section.
 
-The examples do not include the other side of the communication system. In order to have the drivers be compatbile with the other side, it is expected that whatever the STM32 is talking to is:
+The examples do not include the other side of the communication system. In order to have the drivers be compatible with the other side, it is expected that whatever the STM32 is talking to is:
 1) Communicating at a baud rate matching the driver (currently set to 57600)
 2) When using Rx message reception, the messages are formed according to specifications where the message starts with the double bytes "0xF0" and "0xF0" to indicate a message start and the message is shorter than 64 words/256 bytes (that is the size of the Rx message buffer).
