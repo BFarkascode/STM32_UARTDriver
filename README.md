@@ -53,7 +53,7 @@ To deal with a message incoming, we are using:
 
 Note: the "handler" function is an in-built function that is called whenever a periphery's internal interrupt is triggered. It does not need to be prototyped in the header file by the programmer. Interrupts are a particular set of functions that run outside the code loop we write in the "main.c". I will likely do a project on them some other time.
 
-Lastly, whenever to devices are connected up using UART, Tx goes top Rx and Rx goes to Tx on the devices. We don't connect Tx to Tx and Rx to Rx.
+Lastly, whenever two devices are connected up using UART, Tx goes top Rx and Rx goes to Tx on the devices. We don't connect Tx to Tx and Rx to Rx.
 
 ## User guide
 The driver codes provided are self-containing, except for the Rx message buffer and the pointer to that buffer which is set a layer above the drivers (see the main.c). The main.c shows working examples for the drivers.
