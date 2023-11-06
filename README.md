@@ -1,5 +1,7 @@
 # STM32_UARTDriver
 
+We will implement a custom UART driver using bare metal programming on an STM32L0x3 mcu. Only the STM32 side of the project is presented, though the code works with any of the serial monitors, such as TeraTerm.
+
 ## General description
 
 This is a bare metal guide for implementing UART serial for STM32L0xx.
