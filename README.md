@@ -73,4 +73,4 @@ The examples do not include the other side of the communication system. In order
 1) Communicating at a baud rate matching the driver (currently set to 57600)
 2) When using Rx message reception, the messages are formed according to specifications where the message starts with the double bytes "0xF0" and "0xF0" to indicate a message start and the message is shorter than 64 words/256 bytes (that is the size of the Rx message buffer).
 
-Update: I have added the "SAMD21_Bootmaster" project that provides exactly the aforementioned communication profile. It runs on an Arudino Zero or an Adafruit Feather M0.
+Update: I have added the "SAMD21_Bootmaster" project that provides exactly the aforementioned communication profile. It runs on an Arduino Zero or an Adafruit Feather M0.
