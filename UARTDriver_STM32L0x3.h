@@ -1,8 +1,11 @@
 /*
- * UARTDriver_STM32L0x3.h
- *
  *  Created on: Oct 23, 2023
- *      Author: BalazsFarkas
+ *  Author: BalazsFarkas
+ *  Project: STM32_SPIDriver
+ *  Processor: STM32L053R8
+ *  Header version: 1.0
+ *  File: UARTDriver_STM32L0x3.h
+ *  Change history: N/A
  */
 
 #ifndef INC_UARTDRIVER_STM32L0x3_CUSTOM_H_
