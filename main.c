@@ -1,5 +1,14 @@
 /* USER CODE BEGIN Header */
 /**
+ *  Author: BalazsFarkas
+ *  Project: STM32_UARTDriver
+ *  Processor: STM32L053R8
+ *  Compiler: ARM-GCC (STM32 IDE)
+ *  Program version: 1.0
+ *  File: main.c
+ *  Hardware description/pin distribution: TX pin on PA9, RX pin on PA10
+ *  Modified from: N/A
+ *  Change history: N/A
   ******************************************************************************
   * @file           : main.c
   * @brief          : Main program body
